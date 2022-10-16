@@ -184,6 +184,25 @@ impl Relay {
         }
     }
 
+    /// Publishes a message to a different topic
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if `payload` fails to serialize with `pot`.
+    pub fn forward_message<Topic: Serialize>(
+        &self,
+        topic: Topic,
+        message: Message,
+    ) -> Result<(), pot::Error>
+    {
+        let topic = pot::to_vec(&topic)?;
+        let message = Message::raw(topic, message.payload);
+
+        self.publish_message(&message);
+
+        Ok(())
+    }
+
     fn add_subscriber_to_topic(&self, subscriber_id: u64, topic: OwnedBytes) {
         let mut subscribers = self.data.subscribers.write();
         let mut topics = self.data.topics.write();
